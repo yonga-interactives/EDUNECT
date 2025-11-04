@@ -1,0 +1,77 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Student Dashboard — EduNect</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="top">
+    <div><strong>EDUNECT</strong></div>
+    <div>
+      <button id="logoutBtn" class="btn">Sign out</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <h3>Class Name</h3>
+      <nav>
+        <div> Announcements</div>
+        <div> Time Table</div>
+        <div>Library</div>
+        <div> Messages</div>
+        <div> Documents</div>
+        <div> Profile</div>
+        <div> Security</div>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <h2>Welcome, student</h2>
+      <p id="userinfo">Checking account…</p>
+
+      <section id="feed">
+        <article style="background:#fff;padding:14px;border-radius:10px;border:1px solid #e6f0ff">No announcements yet.</article>
+      </section>
+    </main>
+  </div>
+
+  <script type="module">
+    import { userManager, signOutRedirect, getCurrentUser } from "./main.js";
+
+    (async () => {
+      try {
+        const user = await getCurrentUser();
+        if (!user) {
+          // Not signed in — redirect to student login
+          await userManager.signinRedirect({ state: "student" });
+          return;
+        }
+        // Check groups
+        const groups = user?.profile?.["cognito:groups"] || user?.profile?.groups || [];
+        const groupList = Array.isArray(groups) ? groups : (groups ? [groups] : []);
+
+        // if user is NOT in 'students' group, redirect to appropriate dashboard
+        if (!groupList.includes("students") && groupList.includes("teachers")) {
+          // they are teacher — send to teacher dashboard
+          window.location.href = "/teacher-dashboard.html";
+          return;
+        }
+
+        // show basic profile info
+        document.getElementById("userinfo").textContent = `Signed in as ${user.profile?.email || user.profile?.username || "user"}`;
+      } catch (err) {
+        console.error(err);
+        // fallback to login
+        await userManager.signinRedirect({ state: "student" });
+      }
+    })();
+
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+      await signOutRedirect();
+    });
+  </script>
+</body>
+</html>

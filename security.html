@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Security</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+ <header class="top">
+  <div><strong>EDUNECT</strong></div>
+  <button class="btn">Logout</button>
+</header>
+
+  <nav>
+    <a href="announcements.html">Announcements</a>
+    <a href="timetable.html">Time Table</a>
+    <a href="library.html">Library</a>
+    <a href="messages.html">Messages</a>
+    <a href="documents.html">Documents</a>
+    <a href="profile.html">Profile</a>
+    <a href="security.html">Security</a>
+  </nav>
+
+  <div class="content">
+    <h1>Security Settings</h1>
+    <form id="securityForm">
+      <label for="password">Change Password:</label>
+      <input type="password" id="password" placeholder="New password">
+
+      <label for="twofactor">Enable Two-Factor Authentication:</label>
+      <select id="twofactor">
+        <option value="off">Off</option>
+        <option value="sms">SMS</option>
+        <option value="authenticator">Authenticator App</option>
+      </select>
+
+      <button type="button" onclick="saveSecurity()">Save Security Settings</button>
+    </form>
+    <div id="securityOutput"></div>
+  </div>
+
+  <script>
+    function saveSecurity() {
+      const password = document.getElementById('password').value;
+      const twofactor = document.getElementById('twofactor').value;
+      document.getElementById('securityOutput').innerHTML = `<p>Password changed</p><p>Two-Factor: ${twofactor}</p>`;
+      alert('Security settings updated!');
+    }
+  </script>
+</body>
+</html>

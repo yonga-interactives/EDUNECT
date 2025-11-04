@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Callback — EduNect</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>body{font-family:Inter,system-ui,Arial;background:#f8fafc;display:flex;align-items:center;justify-content:center;height:100vh}</style>
+</head>
+<body>
+  <div style="text-align:center">
+    <h3>Signing you in…</h3>
+    <p>Please wait — you will be redirected shortly.</p>
+  </div>
+
+  <script type="module">
+    import { userManager } from "./main.js";
+
+    // Use signinCallback (oidc-client-ts exposes signinCallback / signinRedirectCallback depending on version)
+    // This returns a "user" object with .profile claims
+    (async () => {
+      try {
+        const user = await userManager.signinCallback(); // library may provide signinCallback()
+        // user.profile contains ID token claims
+        // Cognito puts group membership into 'cognito:groups' claim
+        const groups = user?.profile?.["cognito:groups"] || user?.profile?.groups || [];
+        // If groups is a single string, normalize to array
+        const groupList = Array.isArray(groups) ? groups : (groups ? [groups] : []);
+
+        // If the OIDC signin was initiated with a state we set (student/teacher), it may be on user.state
+        const state = user?.state || null;
+
+        // Decide where to redirect:
+        //  - If user is in teachers group -> teacher dashboard
+        //  - Else if user in students group -> student dashboard
+        //  - Else if state is explicit, prefer state
+        //  - Else redirect to choose-role page
+        if (groupList.includes("teachers")) {
+          window.location.href = "/teacher-dashboard.html";
+          return;
+        }
+        if (groupList.includes("students")) {
+          window.location.href = "/student-dashboard.html";
+          return;
+        }
+        // Fallback to using state passed when initiating sign-in
+        if (state === "teacher") {
+          window.location.href = "/tutor-deshbord.html";
+          return;
+        }
+        if (state === "student") {
+          window.location.href = "/student-dashbord.html";
+          return;
+        }
+        // final fallback: choose-role
+        window.location.href = "/choose-role.html";
+      } catch (err) {
+        console.error("Sign-in callback failed", err);
+        // on failure send user back to choose-role so they can retry
+        window.location.href = "/choose-role.html";
+      }
+    })();
+  </script>
+</body>
+</html>
